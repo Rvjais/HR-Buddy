@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -8,6 +10,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { colors, gradients, shadows } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -25,9 +28,138 @@ const Login = () => {
     }
   };
 
+  const getStyles = () => ({
+    container: {
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+      padding: '20px',
+      position: 'relative',
+      animation: 'fadeIn 0.5s ease',
+    },
+    themeToggle: {
+      position: 'absolute',
+      top: '20px',
+      right: '20px',
+      zIndex: 1000,
+    },
+    card: {
+      background: gradients.card,
+      padding: '50px 40px',
+      borderRadius: '20px',
+      boxShadow: `${shadows.xl} ${colors.shadowColorStrong}`,
+      width: '100%',
+      maxWidth: '450px',
+      border: `1px solid ${colors.border}`,
+      animation: 'fadeIn 0.6s ease',
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    cardGlow: {
+      position: 'absolute',
+      top: '-50%',
+      left: '-50%',
+      width: '200%',
+      height: '200%',
+      background: gradients.primary,
+      opacity: '0.03',
+      transform: 'rotate(45deg)',
+      pointerEvents: 'none',
+    },
+    title: {
+      fontSize: '32px',
+      fontWeight: 'bold',
+      marginBottom: '10px',
+      textAlign: 'center',
+      background: gradients.primary,
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+    },
+    subtitle: {
+      fontSize: '15px',
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: '35px',
+    },
+    error: {
+      backgroundColor: colors.errorLight,
+      color: colors.error,
+      padding: '12px 16px',
+      borderRadius: '10px',
+      marginBottom: '20px',
+      fontSize: '14px',
+      border: `1px solid ${colors.error}`,
+      animation: 'slideIn 0.3s ease',
+    },
+    form: {
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      zIndex: 1,
+    },
+    formGroup: {
+      marginBottom: '24px',
+    },
+    label: {
+      display: 'block',
+      marginBottom: '8px',
+      fontSize: '14px',
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    input: {
+      width: '100%',
+      padding: '12px 16px',
+      border: `2px solid ${colors.border}`,
+      borderRadius: '10px',
+      fontSize: '15px',
+      boxSizing: 'border-box',
+      backgroundColor: colors.backgroundSecondary,
+      color: colors.textPrimary,
+      transition: 'all 0.3s ease',
+      outline: 'none',
+    },
+    button: {
+      background: gradients.primary,
+      color: 'white',
+      padding: '14px',
+      border: 'none',
+      borderRadius: '10px',
+      fontSize: '16px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      boxShadow: `${shadows.md} ${colors.shadowColor}`,
+      marginTop: '10px',
+    },
+    footer: {
+      marginTop: '30px',
+      textAlign: 'center',
+      fontSize: '14px',
+      color: colors.textSecondary,
+      position: 'relative',
+      zIndex: 1,
+    },
+    link: {
+      color: colors.primary,
+      textDecoration: 'none',
+      fontWeight: '600',
+      transition: 'color 0.2s ease',
+    },
+  });
+
+  const styles = getStyles();
+
   return (
     <div style={styles.container}>
+      <div style={styles.themeToggle}>
+        <ThemeToggle />
+      </div>
       <div style={styles.card}>
+        <div style={styles.cardGlow}></div>
         <h1 style={styles.title}>HR Buddy Login</h1>
         <p style={styles.subtitle}>Sign in to manage your interview quizzes</p>
 
@@ -43,6 +175,8 @@ const Login = () => {
               required
               style={styles.input}
               placeholder="your@email.com"
+              onFocus={(e) => e.target.style.borderColor = colors.primary}
+              onBlur={(e) => e.target.style.borderColor = colors.border}
             />
           </div>
 
@@ -55,10 +189,18 @@ const Login = () => {
               required
               style={styles.input}
               placeholder="Enter your password"
+              onFocus={(e) => e.target.style.borderColor = colors.primary}
+              onBlur={(e) => e.target.style.borderColor = colors.border}
             />
           </div>
 
-          <button type="submit" disabled={loading} style={styles.button}>
+          <button
+            type="submit"
+            disabled={loading}
+            style={styles.button}
+            onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+            onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+          >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
@@ -69,89 +211,6 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: '20px'
-  },
-  card: {
-    backgroundColor: 'white',
-    padding: '40px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-    width: '100%',
-    maxWidth: '400px'
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    marginBottom: '10px',
-    textAlign: 'center',
-    color: '#333'
-  },
-  subtitle: {
-    fontSize: '14px',
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: '30px'
-  },
-  error: {
-    backgroundColor: '#fee',
-    color: '#c33',
-    padding: '10px',
-    borderRadius: '4px',
-    marginBottom: '20px',
-    fontSize: '14px'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  formGroup: {
-    marginBottom: '20px'
-  },
-  label: {
-    display: 'block',
-    marginBottom: '5px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#333'
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '14px',
-    boxSizing: 'border-box'
-  },
-  button: {
-    backgroundColor: '#007bff',
-    color: 'white',
-    padding: '12px',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '16px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s'
-  },
-  footer: {
-    marginTop: '20px',
-    textAlign: 'center',
-    fontSize: '14px',
-    color: '#666'
-  },
-  link: {
-    color: '#007bff',
-    textDecoration: 'none'
-  }
 };
 
 export default Login;

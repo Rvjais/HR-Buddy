@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quizAPI, attemptAPI } from '../services/api';
 import { formatTime } from '../utils/formatTime';
+import { useTheme } from '../context/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 const TakeQuiz = () => {
   const { id, attemptId } = useParams();
@@ -14,6 +16,7 @@ const TakeQuiz = () => {
   const navigate = useNavigate();
   const timerRef = useRef(null);
   const startTimeRef = useRef(Date.now());
+  const { colors, gradients, shadows } = useTheme();
 
   useEffect(() => {
     fetchQuiz();
@@ -85,10 +88,205 @@ const TakeQuiz = () => {
     }
   };
 
+  const getStyles = () => ({
+    container: {
+      minHeight: '100vh',
+      backgroundColor: colors.background,
+      padding: '20px',
+      animation: 'fadeIn 0.5s ease',
+    },
+    wrapper: {
+      maxWidth: '800px',
+      margin: '0 auto',
+    },
+    header: {
+      background: gradients.card,
+      padding: '24px',
+      borderRadius: '16px',
+      marginBottom: '20px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      border: `1px solid ${colors.border}`,
+      boxShadow: `${shadows.md} ${colors.shadowColor}`,
+      flexWrap: 'wrap',
+      gap: '16px',
+    },
+    headerLeft: {
+      flex: 1,
+    },
+    title: {
+      fontSize: '24px',
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+      margin: '0',
+    },
+    subtitle: {
+      fontSize: '14px',
+      color: colors.textSecondary,
+      margin: '5px 0 0 0',
+    },
+    headerRight: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+    },
+    timerBox: {
+      textAlign: 'center',
+      padding: '12px 20px',
+      background: colors.backgroundSecondary,
+      borderRadius: '12px',
+      border: `1px solid ${colors.border}`,
+    },
+    timer: {
+      fontSize: '32px',
+      fontWeight: 'bold',
+      fontFamily: 'monospace',
+    },
+    timerLabel: {
+      fontSize: '12px',
+      color: colors.textSecondary,
+      marginTop: '5px',
+    },
+    progressBar: {
+      height: '8px',
+      background: colors.backgroundSecondary,
+      borderRadius: '4px',
+      marginBottom: '20px',
+      overflow: 'hidden',
+      border: `1px solid ${colors.border}`,
+    },
+    progressFill: {
+      height: '100%',
+      background: gradients.success,
+      transition: 'width 0.3s ease',
+    },
+    error: {
+      backgroundColor: colors.errorLight,
+      color: colors.error,
+      padding: '15px 20px',
+      borderRadius: '12px',
+      marginBottom: '20px',
+      border: `1px solid ${colors.error}`,
+      animation: 'slideIn 0.3s ease',
+    },
+    loading: {
+      background: gradients.card,
+      padding: '40px',
+      borderRadius: '16px',
+      textAlign: 'center',
+      fontSize: '18px',
+      color: colors.textSecondary,
+      border: `1px solid ${colors.border}`,
+      boxShadow: `${shadows.md} ${colors.shadowColor}`,
+      animation: 'pulse 2s ease-in-out infinite',
+    },
+    questionsContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '20px',
+      marginBottom: '30px',
+    },
+    questionCard: {
+      background: gradients.card,
+      padding: '28px',
+      borderRadius: '16px',
+      border: `1px solid ${colors.border}`,
+      boxShadow: `${shadows.md} ${colors.shadowColor}`,
+      transition: 'all 0.3s ease',
+      animation: 'fadeIn 0.6s ease',
+    },
+    questionHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '15px',
+    },
+    questionNumber: {
+      fontSize: '14px',
+      fontWeight: 'bold',
+      color: colors.primary,
+    },
+    answeredBadge: {
+      background: gradients.success,
+      color: 'white',
+      padding: '6px 14px',
+      borderRadius: '20px',
+      fontSize: '12px',
+      fontWeight: '600',
+      boxShadow: `${shadows.sm} ${colors.shadowColor}`,
+    },
+    questionText: {
+      fontSize: '16px',
+      color: colors.textPrimary,
+      marginBottom: '20px',
+      lineHeight: '1.5',
+      fontWeight: '500',
+    },
+    optionsContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px',
+    },
+    optionLabel: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: '16px',
+      border: '2px solid',
+      borderRadius: '12px',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      backgroundColor: colors.backgroundSecondary,
+    },
+    radio: {
+      marginRight: '12px',
+      cursor: 'pointer',
+      width: '18px',
+      height: '18px',
+    },
+    optionText: {
+      fontSize: '14px',
+      color: colors.textPrimary,
+      flex: '1',
+    },
+    submitSection: {
+      background: gradients.card,
+      padding: '24px',
+      borderRadius: '16px',
+      textAlign: 'center',
+      border: `1px solid ${colors.border}`,
+      boxShadow: `${shadows.lg} ${colors.shadowColor}`,
+      position: 'sticky',
+      bottom: '20px',
+    },
+    submitButton: {
+      background: gradients.success,
+      color: 'white',
+      padding: '14px 40px',
+      border: 'none',
+      borderRadius: '12px',
+      fontSize: '16px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      boxShadow: `${shadows.md} ${colors.shadowColor}`,
+    },
+    warning: {
+      fontSize: '14px',
+      color: colors.textSecondary,
+      marginTop: '12px',
+      marginBottom: '0',
+    },
+  });
+
+  const styles = getStyles();
+
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Loading quiz...</div>
+        <div style={styles.wrapper}>
+          <div style={styles.loading}>Loading quiz...</div>
+        </div>
       </div>
     );
   }
@@ -99,21 +297,25 @@ const TakeQuiz = () => {
 
   return (
     <div style={styles.container}>
+      <div style={styles.wrapper}>
       <div style={styles.header}>
-        <div>
+        <div style={styles.headerLeft}>
           <h1 style={styles.title}>{quiz?.title}</h1>
           <p style={styles.subtitle}>
             Progress: {answeredCount} / {totalQuestions} answered
           </p>
         </div>
-        <div style={styles.timerBox}>
-          <div style={{
-            ...styles.timer,
-            color: timeLeft < 60 ? '#dc3545' : '#333'
-          }}>
-            {formatTime(timeLeft)}
+        <div style={styles.headerRight}>
+          <div style={styles.timerBox}>
+            <div style={{
+              ...styles.timer,
+              color: timeLeft < 60 ? colors.error : colors.textPrimary
+            }}>
+              {formatTime(timeLeft)}
+            </div>
+            <div style={styles.timerLabel}>Time Remaining</div>
           </div>
-          <div style={styles.timerLabel}>Time Remaining</div>
+          <ThemeToggle />
         </div>
       </div>
 
@@ -144,8 +346,20 @@ const TakeQuiz = () => {
                   key={optIndex}
                   style={{
                     ...styles.optionLabel,
-                    backgroundColor: answers[index] === option ? '#e3f2fd' : 'white',
-                    borderColor: answers[index] === option ? '#007bff' : '#ddd'
+                    backgroundColor: answers[index] === option ? colors.backgroundTertiary : colors.backgroundSecondary,
+                    borderColor: answers[index] === option ? colors.primary : colors.border
+                  }}
+                  onMouseEnter={(e) => {
+                    if (answers[index] !== option) {
+                      e.currentTarget.style.borderColor = colors.primary;
+                      e.currentTarget.style.transform = 'translateX(4px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (answers[index] !== option) {
+                      e.currentTarget.style.borderColor = colors.border;
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }
                   }}
                 >
                   <input
@@ -169,6 +383,8 @@ const TakeQuiz = () => {
           onClick={() => handleSubmit(false)}
           disabled={submitting || answeredCount === 0}
           style={styles.submitButton}
+          onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
         >
           {submitting ? 'Submitting...' : 'Submit Quiz'}
         </button>
@@ -178,167 +394,9 @@ const TakeQuiz = () => {
           </p>
         )}
       </div>
+      </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '20px',
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5'
-  },
-  header: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    marginBottom: '20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  title: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#333',
-    margin: '0'
-  },
-  subtitle: {
-    fontSize: '14px',
-    color: '#666',
-    margin: '5px 0 0 0'
-  },
-  timerBox: {
-    textAlign: 'center'
-  },
-  timer: {
-    fontSize: '32px',
-    fontWeight: 'bold',
-    fontFamily: 'monospace'
-  },
-  timerLabel: {
-    fontSize: '12px',
-    color: '#666',
-    marginTop: '5px'
-  },
-  progressBar: {
-    height: '8px',
-    backgroundColor: '#e0e0e0',
-    borderRadius: '4px',
-    marginBottom: '20px',
-    overflow: 'hidden'
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#28a745',
-    transition: 'width 0.3s ease'
-  },
-  error: {
-    backgroundColor: '#fee',
-    color: '#c33',
-    padding: '15px',
-    borderRadius: '4px',
-    marginBottom: '20px'
-  },
-  loading: {
-    backgroundColor: 'white',
-    padding: '40px',
-    borderRadius: '8px',
-    textAlign: 'center',
-    fontSize: '18px',
-    color: '#666'
-  },
-  questionsContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    marginBottom: '30px'
-  },
-  questionCard: {
-    backgroundColor: 'white',
-    padding: '25px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  questionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '15px'
-  },
-  questionNumber: {
-    fontSize: '14px',
-    fontWeight: 'bold',
-    color: '#007bff'
-  },
-  answeredBadge: {
-    backgroundColor: '#28a745',
-    color: 'white',
-    padding: '4px 12px',
-    borderRadius: '12px',
-    fontSize: '12px',
-    fontWeight: '500'
-  },
-  questionText: {
-    fontSize: '16px',
-    color: '#333',
-    marginBottom: '20px',
-    lineHeight: '1.5'
-  },
-  optionsContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px'
-  },
-  optionLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '15px',
-    border: '2px solid',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  radio: {
-    marginRight: '12px',
-    cursor: 'pointer',
-    width: '18px',
-    height: '18px'
-  },
-  optionText: {
-    fontSize: '14px',
-    color: '#333',
-    flex: '1'
-  },
-  submitSection: {
-    backgroundColor: 'white',
-    padding: '20px',
-    borderRadius: '8px',
-    textAlign: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    position: 'sticky',
-    bottom: '20px'
-  },
-  submitButton: {
-    backgroundColor: '#28a745',
-    color: 'white',
-    padding: '14px 40px',
-    border: 'none',
-    borderRadius: '4px',
-    fontSize: '16px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s'
-  },
-  warning: {
-    fontSize: '14px',
-    color: '#856404',
-    marginTop: '10px',
-    marginBottom: '0'
-  }
 };
 
 export default TakeQuiz;
