@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { quizAPI, aiAPI } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 const CreateQuiz = () => {
   const [title, setTitle] = useState('');
@@ -13,6 +15,7 @@ const CreateQuiz = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { colors, gradients, shadows } = useTheme();
 
   const handleGenerateQuestions = async () => {
     if (!jobProfile) {
@@ -79,14 +82,210 @@ const CreateQuiz = () => {
     setQuestions(questions.filter((_, i) => i !== index));
   };
 
+  const getStyles = () => ({
+    container: {
+      minHeight: '100vh',
+      backgroundColor: colors.background,
+      padding: '30px 20px',
+      animation: 'fadeIn 0.5s ease',
+    },
+    wrapper: {
+      maxWidth: '900px',
+      margin: '0 auto',
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '30px',
+      padding: '30px',
+      background: gradients.card,
+      borderRadius: '20px',
+      border: `1px solid ${colors.border}`,
+      boxShadow: `${shadows.lg} ${colors.shadowColor}`,
+    },
+    title: {
+      fontSize: '32px',
+      fontWeight: 'bold',
+      background: gradients.primary,
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      margin: '0',
+    },
+    backButton: {
+      backgroundColor: colors.backgroundTertiary,
+      color: colors.textPrimary,
+      padding: '12px 24px',
+      borderRadius: '12px',
+      border: `2px solid ${colors.border}`,
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+    },
+    error: {
+      backgroundColor: colors.errorLight,
+      color: colors.error,
+      padding: '15px 20px',
+      borderRadius: '12px',
+      marginBottom: '20px',
+      border: `1px solid ${colors.error}`,
+      animation: 'slideIn 0.3s ease',
+    },
+    form: {
+      background: gradients.card,
+      padding: '30px',
+      borderRadius: '16px',
+      border: `1px solid ${colors.border}`,
+      boxShadow: `${shadows.md} ${colors.shadowColor}`,
+      animation: 'fadeIn 0.6s ease',
+    },
+    section: {
+      marginBottom: '30px',
+    },
+    sectionHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '20px',
+    },
+    sectionTitle: {
+      fontSize: '24px',
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+      marginBottom: '20px',
+    },
+    formGroup: {
+      marginBottom: '20px',
+    },
+    row: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '20px',
+    },
+    label: {
+      display: 'block',
+      marginBottom: '8px',
+      fontSize: '14px',
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    input: {
+      width: '100%',
+      padding: '12px 16px',
+      border: `2px solid ${colors.border}`,
+      borderRadius: '10px',
+      fontSize: '14px',
+      boxSizing: 'border-box',
+      backgroundColor: colors.backgroundSecondary,
+      color: colors.textPrimary,
+      transition: 'all 0.3s ease',
+      outline: 'none',
+    },
+    textarea: {
+      width: '100%',
+      padding: '12px 16px',
+      border: `2px solid ${colors.border}`,
+      borderRadius: '10px',
+      fontSize: '14px',
+      boxSizing: 'border-box',
+      backgroundColor: colors.backgroundSecondary,
+      color: colors.textPrimary,
+      fontFamily: 'inherit',
+      resize: 'vertical',
+      transition: 'all 0.3s ease',
+      outline: 'none',
+    },
+    generateButton: {
+      background: gradients.success,
+      color: 'white',
+      padding: '12px 24px',
+      borderRadius: '12px',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+      boxShadow: `${shadows.md} ${colors.shadowColor}`,
+    },
+    emptyQuestions: {
+      textAlign: 'center',
+      padding: '60px 40px',
+      background: colors.backgroundSecondary,
+      borderRadius: '12px',
+      color: colors.textSecondary,
+      border: `1px solid ${colors.border}`,
+    },
+    questionsList: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '20px',
+    },
+    questionCard: {
+      background: colors.backgroundSecondary,
+      padding: '24px',
+      borderRadius: '12px',
+      border: `1px solid ${colors.border}`,
+      transition: 'all 0.3s ease',
+    },
+    questionHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '15px',
+    },
+    questionNumber: {
+      fontSize: '16px',
+      fontWeight: 'bold',
+      color: colors.primary,
+    },
+    removeButton: {
+      background: gradients.secondary,
+      color: 'white',
+      padding: '8px 16px',
+      borderRadius: '8px',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '12px',
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+      boxShadow: `${shadows.sm} ${colors.shadowColor}`,
+    },
+    submitButton: {
+      background: gradients.primary,
+      color: 'white',
+      padding: '14px 30px',
+      borderRadius: '12px',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '16px',
+      fontWeight: '600',
+      width: '100%',
+      transition: 'all 0.3s ease',
+      boxShadow: `${shadows.md} ${colors.shadowColor}`,
+    },
+  });
+
+  const styles = getStyles();
+
   return (
     <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.title}>Create New Quiz</h1>
-        <button onClick={() => navigate('/dashboard')} style={styles.backButton}>
-          Back to Dashboard
-        </button>
-      </div>
+      <div style={styles.wrapper}>
+        <div style={styles.header}>
+          <h1 style={styles.title}>Create New Quiz</h1>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <ThemeToggle />
+            <button
+              onClick={() => navigate('/dashboard')}
+              style={styles.backButton}
+              onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+              onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
 
       {error && <div style={styles.error}>{error}</div>}
 
@@ -103,6 +302,8 @@ const CreateQuiz = () => {
               required
               style={styles.input}
               placeholder="e.g., React Developer Interview"
+              onFocus={(e) => e.target.style.borderColor = colors.primary}
+              onBlur={(e) => e.target.style.borderColor = colors.border}
             />
           </div>
 
@@ -115,6 +316,8 @@ const CreateQuiz = () => {
               required
               style={styles.input}
               placeholder="e.g., React Developer, Node.js Engineer"
+              onFocus={(e) => e.target.style.borderColor = colors.primary}
+              onBlur={(e) => e.target.style.borderColor = colors.border}
             />
           </div>
 
@@ -126,6 +329,8 @@ const CreateQuiz = () => {
               style={styles.textarea}
               placeholder="Brief description of the quiz..."
               rows={3}
+              onFocus={(e) => e.target.style.borderColor = colors.primary}
+              onBlur={(e) => e.target.style.borderColor = colors.border}
             />
           </div>
 
@@ -140,6 +345,8 @@ const CreateQuiz = () => {
                 min={5}
                 max={60}
                 style={styles.input}
+                onFocus={(e) => e.target.style.borderColor = colors.primary}
+                onBlur={(e) => e.target.style.borderColor = colors.border}
               />
             </div>
 
@@ -152,6 +359,8 @@ const CreateQuiz = () => {
                 min={5}
                 max={30}
                 style={styles.input}
+                onFocus={(e) => e.target.style.borderColor = colors.primary}
+                onBlur={(e) => e.target.style.borderColor = colors.border}
               />
             </div>
           </div>
@@ -165,6 +374,8 @@ const CreateQuiz = () => {
               onClick={handleGenerateQuestions}
               disabled={generating}
               style={styles.generateButton}
+              onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+              onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
             >
               {generating ? 'Generating...' : '✨ Generate Questions with AI'}
             </button>
@@ -184,6 +395,8 @@ const CreateQuiz = () => {
                       type="button"
                       onClick={() => removeQuestion(qIndex)}
                       style={styles.removeButton}
+                      onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                     >
                       Remove
                     </button>
@@ -196,6 +409,8 @@ const CreateQuiz = () => {
                       onChange={(e) => updateQuestion(qIndex, 'questionText', e.target.value)}
                       style={styles.textarea}
                       rows={2}
+                      onFocus={(e) => e.target.style.borderColor = colors.primary}
+                      onBlur={(e) => e.target.style.borderColor = colors.border}
                     />
                   </div>
 
@@ -209,6 +424,8 @@ const CreateQuiz = () => {
                         onChange={(e) => updateOption(qIndex, optIndex, e.target.value)}
                         style={{ ...styles.input, marginBottom: '8px' }}
                         placeholder={`Option ${optIndex + 1}`}
+                        onFocus={(e) => e.target.style.borderColor = colors.primary}
+                        onBlur={(e) => e.target.style.borderColor = colors.border}
                       />
                     ))}
                   </div>
@@ -219,6 +436,8 @@ const CreateQuiz = () => {
                       value={q.correctAnswer}
                       onChange={(e) => updateQuestion(qIndex, 'correctAnswer', e.target.value)}
                       style={styles.input}
+                      onFocus={(e) => e.target.style.borderColor = colors.primary}
+                      onBlur={(e) => e.target.style.borderColor = colors.border}
                     >
                       {q.options?.map((opt, i) => (
                         <option key={i} value={opt}>{opt}</option>
@@ -235,161 +454,15 @@ const CreateQuiz = () => {
           type="submit"
           disabled={loading || questions.length === 0}
           style={styles.submitButton}
+          onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
         >
           {loading ? 'Creating Quiz...' : 'Create Quiz'}
         </button>
       </form>
+      </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: '900px',
-    margin: '0 auto',
-    padding: '20px'
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '30px'
-  },
-  title: {
-    fontSize: '32px',
-    fontWeight: 'bold',
-    color: '#333',
-    margin: '0'
-  },
-  backButton: {
-    backgroundColor: '#6c757d',
-    color: 'white',
-    padding: '10px 20px',
-    borderRadius: '4px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '14px'
-  },
-  error: {
-    backgroundColor: '#fee',
-    color: '#c33',
-    padding: '15px',
-    borderRadius: '4px',
-    marginBottom: '20px'
-  },
-  form: {
-    backgroundColor: 'white',
-    padding: '30px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  },
-  section: {
-    marginBottom: '30px'
-  },
-  sectionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px'
-  },
-  sectionTitle: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '20px'
-  },
-  formGroup: {
-    marginBottom: '20px'
-  },
-  row: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '20px'
-  },
-  label: {
-    display: 'block',
-    marginBottom: '5px',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#333'
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '14px',
-    boxSizing: 'border-box'
-  },
-  textarea: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
-    resize: 'vertical'
-  },
-  generateButton: {
-    backgroundColor: '#28a745',
-    color: 'white',
-    padding: '10px 20px',
-    borderRadius: '4px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500'
-  },
-  emptyQuestions: {
-    textAlign: 'center',
-    padding: '40px',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '8px',
-    color: '#666'
-  },
-  questionsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px'
-  },
-  questionCard: {
-    backgroundColor: '#f8f9fa',
-    padding: '20px',
-    borderRadius: '8px',
-    border: '1px solid #e0e0e0'
-  },
-  questionHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '15px'
-  },
-  questionNumber: {
-    fontSize: '16px',
-    fontWeight: 'bold',
-    color: '#007bff'
-  },
-  removeButton: {
-    backgroundColor: '#dc3545',
-    color: 'white',
-    padding: '6px 12px',
-    borderRadius: '4px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '12px'
-  },
-  submitButton: {
-    backgroundColor: '#007bff',
-    color: 'white',
-    padding: '14px 30px',
-    borderRadius: '4px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '500',
-    width: '100%'
-  }
 };
 
 export default CreateQuiz;
