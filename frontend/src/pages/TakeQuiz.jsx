@@ -30,11 +30,19 @@ const TakeQuiz = () => {
   const fetchQuiz = async () => {
     try {
       const response = await quizAPI.getPublic(id);
-      setQuiz(response.data);
-      setTimeLeft(response.data.timeLimitMinutes * 60);
-      startTimer(response.data.timeLimitMinutes * 60);
+      const quizData = response.data;
+
+      // Validate quiz data
+      if (!quizData || !quizData.timeLimitMinutes || !quizData.questions) {
+        throw new Error('Invalid quiz data');
+      }
+
+      setQuiz(quizData);
+      const timeInSeconds = quizData.timeLimitMinutes * 60;
+      setTimeLeft(timeInSeconds);
+      startTimer(timeInSeconds);
     } catch (err) {
-      setError('Failed to load quiz');
+      setError(err.response?.data?.message || err.message || 'Failed to load quiz');
     } finally {
       setLoading(false);
     }
@@ -293,107 +301,107 @@ const TakeQuiz = () => {
 
   const answeredCount = Object.keys(answers).length;
   const totalQuestions = quiz?.questions?.length || 0;
-  const progressPercent = (answeredCount / totalQuestions) * 100;
+  const progressPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
   return (
     <div style={styles.container}>
       <div style={styles.wrapper}>
-      <div style={styles.header}>
-        <div style={styles.headerLeft}>
-          <h1 style={styles.title}>{quiz?.title}</h1>
-          <p style={styles.subtitle}>
-            Progress: {answeredCount} / {totalQuestions} answered
-          </p>
-        </div>
-        <div style={styles.headerRight}>
-          <div style={styles.timerBox}>
-            <div style={{
-              ...styles.timer,
-              color: timeLeft < 60 ? colors.error : colors.textPrimary
-            }}>
-              {formatTime(timeLeft)}
-            </div>
-            <div style={styles.timerLabel}>Time Remaining</div>
+        <div style={styles.header}>
+          <div style={styles.headerLeft}>
+            <h1 style={styles.title}>{quiz?.title}</h1>
+            <p style={styles.subtitle}>
+              Progress: {answeredCount} / {totalQuestions} answered
+            </p>
           </div>
-          <ThemeToggle />
-        </div>
-      </div>
-
-      <div style={styles.progressBar}>
-        <div style={{
-          ...styles.progressFill,
-          width: `${progressPercent}%`
-        }} />
-      </div>
-
-      {error && <div style={styles.error}>{error}</div>}
-
-      <div style={styles.questionsContainer}>
-        {quiz?.questions?.map((question, index) => (
-          <div key={index} style={styles.questionCard}>
-            <div style={styles.questionHeader}>
-              <span style={styles.questionNumber}>Question {index + 1}</span>
-              {answers[index] && (
-                <span style={styles.answeredBadge}>Answered</span>
-              )}
+          <div style={styles.headerRight}>
+            <div style={styles.timerBox}>
+              <div style={{
+                ...styles.timer,
+                color: timeLeft < 60 ? colors.error : colors.textPrimary
+              }}>
+                {formatTime(timeLeft)}
+              </div>
+              <div style={styles.timerLabel}>Time Remaining</div>
             </div>
-
-            <p style={styles.questionText}>{question.questionText}</p>
-
-            <div style={styles.optionsContainer}>
-              {question.options?.map((option, optIndex) => (
-                <label
-                  key={optIndex}
-                  style={{
-                    ...styles.optionLabel,
-                    backgroundColor: answers[index] === option ? colors.backgroundTertiary : colors.backgroundSecondary,
-                    borderColor: answers[index] === option ? colors.primary : colors.border
-                  }}
-                  onMouseEnter={(e) => {
-                    if (answers[index] !== option) {
-                      e.currentTarget.style.borderColor = colors.primary;
-                      e.currentTarget.style.transform = 'translateX(4px)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (answers[index] !== option) {
-                      e.currentTarget.style.borderColor = colors.border;
-                      e.currentTarget.style.transform = 'translateX(0)';
-                    }
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name={`question-${index}`}
-                    value={option}
-                    checked={answers[index] === option}
-                    onChange={() => handleAnswerChange(index, option)}
-                    style={styles.radio}
-                  />
-                  <span style={styles.optionText}>{option}</span>
-                </label>
-              ))}
-            </div>
+            <ThemeToggle />
           </div>
-        ))}
-      </div>
+        </div>
 
-      <div style={styles.submitSection}>
-        <button
-          onClick={() => handleSubmit(false)}
-          disabled={submitting || answeredCount === 0}
-          style={styles.submitButton}
-          onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
-        >
-          {submitting ? 'Submitting...' : 'Submit Quiz'}
-        </button>
-        {answeredCount < totalQuestions && (
-          <p style={styles.warning}>
-            You have {totalQuestions - answeredCount} unanswered question(s)
-          </p>
-        )}
-      </div>
+        <div style={styles.progressBar}>
+          <div style={{
+            ...styles.progressFill,
+            width: `${progressPercent}%`
+          }} />
+        </div>
+
+        {error && <div style={styles.error}>{error}</div>}
+
+        <div style={styles.questionsContainer}>
+          {quiz?.questions?.map((question, index) => (
+            <div key={index} style={styles.questionCard}>
+              <div style={styles.questionHeader}>
+                <span style={styles.questionNumber}>Question {index + 1}</span>
+                {answers[index] && (
+                  <span style={styles.answeredBadge}>Answered</span>
+                )}
+              </div>
+
+              <p style={styles.questionText}>{question.questionText}</p>
+
+              <div style={styles.optionsContainer}>
+                {question.options?.map((option, optIndex) => (
+                  <label
+                    key={optIndex}
+                    style={{
+                      ...styles.optionLabel,
+                      backgroundColor: answers[index] === option ? colors.backgroundTertiary : colors.backgroundSecondary,
+                      borderColor: answers[index] === option ? colors.primary : colors.border
+                    }}
+                    onMouseEnter={(e) => {
+                      if (answers[index] !== option) {
+                        e.currentTarget.style.borderColor = colors.primary;
+                        e.currentTarget.style.transform = 'translateX(4px)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (answers[index] !== option) {
+                        e.currentTarget.style.borderColor = colors.border;
+                        e.currentTarget.style.transform = 'translateX(0)';
+                      }
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name={`question-${index}`}
+                      value={option}
+                      checked={answers[index] === option}
+                      onChange={() => handleAnswerChange(index, option)}
+                      style={styles.radio}
+                    />
+                    <span style={styles.optionText}>{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={styles.submitSection}>
+          <button
+            onClick={() => handleSubmit(false)}
+            disabled={submitting || answeredCount === 0}
+            style={styles.submitButton}
+            onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+            onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+          >
+            {submitting ? 'Submitting...' : 'Submit Quiz'}
+          </button>
+          {answeredCount < totalQuestions && (
+            <p style={styles.warning}>
+              You have {totalQuestions - answeredCount} unanswered question(s)
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

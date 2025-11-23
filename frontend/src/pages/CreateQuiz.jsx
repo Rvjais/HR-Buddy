@@ -287,179 +287,179 @@ const CreateQuiz = () => {
           </div>
         </div>
 
-      {error && <div style={styles.error}>{error}</div>}
+        {error && <div style={styles.error}>{error}</div>}
 
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Quiz Details</h2>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.section}>
+            <h2 style={styles.sectionTitle}>Quiz Details</h2>
 
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Quiz Title *</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              style={styles.input}
-              placeholder="e.g., React Developer Interview"
-              onFocus={(e) => e.target.style.borderColor = colors.primary}
-              onBlur={(e) => e.target.style.borderColor = colors.border}
-            />
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Job Profile *</label>
-            <input
-              type="text"
-              value={jobProfile}
-              onChange={(e) => setJobProfile(e.target.value)}
-              required
-              style={styles.input}
-              placeholder="e.g., React Developer, Node.js Engineer"
-              onFocus={(e) => e.target.style.borderColor = colors.primary}
-              onBlur={(e) => e.target.style.borderColor = colors.border}
-            />
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              style={styles.textarea}
-              placeholder="Brief description of the quiz..."
-              rows={3}
-              onFocus={(e) => e.target.style.borderColor = colors.primary}
-              onBlur={(e) => e.target.style.borderColor = colors.border}
-            />
-          </div>
-
-          <div style={styles.row}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Time Limit (minutes) *</label>
+              <label style={styles.label}>Quiz Title *</label>
               <input
-                type="number"
-                value={timeLimitMinutes}
-                onChange={(e) => setTimeLimitMinutes(parseInt(e.target.value))}
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
-                min={5}
-                max={60}
                 style={styles.input}
+                placeholder="e.g., React Developer Interview"
                 onFocus={(e) => e.target.style.borderColor = colors.primary}
                 onBlur={(e) => e.target.style.borderColor = colors.border}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Number of Questions</label>
+              <label style={styles.label}>Job Profile *</label>
               <input
-                type="number"
-                value={numberOfQuestions}
-                onChange={(e) => setNumberOfQuestions(parseInt(e.target.value))}
-                min={5}
-                max={30}
+                type="text"
+                value={jobProfile}
+                onChange={(e) => setJobProfile(e.target.value)}
+                required
                 style={styles.input}
+                placeholder="e.g., React Developer, Node.js Engineer"
                 onFocus={(e) => e.target.style.borderColor = colors.primary}
                 onBlur={(e) => e.target.style.borderColor = colors.border}
               />
             </div>
-          </div>
-        </div>
 
-        <div style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Questions</h2>
-            <button
-              type="button"
-              onClick={handleGenerateQuestions}
-              disabled={generating}
-              style={styles.generateButton}
-              onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-              onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
-            >
-              {generating ? 'Generating...' : '✨ Generate Questions with AI'}
-            </button>
-          </div>
-
-          {questions.length === 0 ? (
-            <div style={styles.emptyQuestions}>
-              <p>No questions yet. Click "Generate Questions with AI" to get started.</p>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                style={styles.textarea}
+                placeholder="Brief description of the quiz..."
+                rows={3}
+                onFocus={(e) => e.target.style.borderColor = colors.primary}
+                onBlur={(e) => e.target.style.borderColor = colors.border}
+              />
             </div>
-          ) : (
-            <div style={styles.questionsList}>
-              {questions.map((q, qIndex) => (
-                <div key={qIndex} style={styles.questionCard}>
-                  <div style={styles.questionHeader}>
-                    <span style={styles.questionNumber}>Question {qIndex + 1}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeQuestion(qIndex)}
-                      style={styles.removeButton}
-                      onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-                      onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
-                    >
-                      Remove
-                    </button>
-                  </div>
 
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Question Text</label>
-                    <textarea
-                      value={q.questionText}
-                      onChange={(e) => updateQuestion(qIndex, 'questionText', e.target.value)}
-                      style={styles.textarea}
-                      rows={2}
-                      onFocus={(e) => e.target.style.borderColor = colors.primary}
-                      onBlur={(e) => e.target.style.borderColor = colors.border}
-                    />
-                  </div>
+            <div style={styles.row}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Time Limit (minutes) *</label>
+                <input
+                  type="number"
+                  value={timeLimitMinutes}
+                  onChange={(e) => setTimeLimitMinutes(parseInt(e.target.value) || 0)}
+                  required
+                  min={5}
+                  max={60}
+                  style={styles.input}
+                  onFocus={(e) => e.target.style.borderColor = colors.primary}
+                  onBlur={(e) => e.target.style.borderColor = colors.border}
+                />
+              </div>
 
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Options</label>
-                    {q.options?.map((opt, optIndex) => (
-                      <input
-                        key={optIndex}
-                        type="text"
-                        value={opt}
-                        onChange={(e) => updateOption(qIndex, optIndex, e.target.value)}
-                        style={{ ...styles.input, marginBottom: '8px' }}
-                        placeholder={`Option ${optIndex + 1}`}
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Number of Questions</label>
+                <input
+                  type="number"
+                  value={numberOfQuestions}
+                  onChange={(e) => setNumberOfQuestions(parseInt(e.target.value) || 0)}
+                  min={5}
+                  max={30}
+                  style={styles.input}
+                  onFocus={(e) => e.target.style.borderColor = colors.primary}
+                  onBlur={(e) => e.target.style.borderColor = colors.border}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div style={styles.section}>
+            <div style={styles.sectionHeader}>
+              <h2 style={styles.sectionTitle}>Questions</h2>
+              <button
+                type="button"
+                onClick={handleGenerateQuestions}
+                disabled={generating}
+                style={styles.generateButton}
+                onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+              >
+                {generating ? 'Generating...' : '✨ Generate Questions with AI'}
+              </button>
+            </div>
+
+            {questions.length === 0 ? (
+              <div style={styles.emptyQuestions}>
+                <p>No questions yet. Click "Generate Questions with AI" to get started.</p>
+              </div>
+            ) : (
+              <div style={styles.questionsList}>
+                {questions.map((q, qIndex) => (
+                  <div key={qIndex} style={styles.questionCard}>
+                    <div style={styles.questionHeader}>
+                      <span style={styles.questionNumber}>Question {qIndex + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeQuestion(qIndex)}
+                        style={styles.removeButton}
+                        onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                        onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Question Text</label>
+                      <textarea
+                        value={q.questionText}
+                        onChange={(e) => updateQuestion(qIndex, 'questionText', e.target.value)}
+                        style={styles.textarea}
+                        rows={2}
                         onFocus={(e) => e.target.style.borderColor = colors.primary}
                         onBlur={(e) => e.target.style.borderColor = colors.border}
                       />
-                    ))}
-                  </div>
+                    </div>
 
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Correct Answer</label>
-                    <select
-                      value={q.correctAnswer}
-                      onChange={(e) => updateQuestion(qIndex, 'correctAnswer', e.target.value)}
-                      style={styles.input}
-                      onFocus={(e) => e.target.style.borderColor = colors.primary}
-                      onBlur={(e) => e.target.style.borderColor = colors.border}
-                    >
-                      {q.options?.map((opt, i) => (
-                        <option key={i} value={opt}>{opt}</option>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Options</label>
+                      {q.options?.map((opt, optIndex) => (
+                        <input
+                          key={optIndex}
+                          type="text"
+                          value={opt}
+                          onChange={(e) => updateOption(qIndex, optIndex, e.target.value)}
+                          style={{ ...styles.input, marginBottom: '8px' }}
+                          placeholder={`Option ${optIndex + 1}`}
+                          onFocus={(e) => e.target.style.borderColor = colors.primary}
+                          onBlur={(e) => e.target.style.borderColor = colors.border}
+                        />
                       ))}
-                    </select>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                    </div>
 
-        <button
-          type="submit"
-          disabled={loading || questions.length === 0}
-          style={styles.submitButton}
-          onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-          onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
-        >
-          {loading ? 'Creating Quiz...' : 'Create Quiz'}
-        </button>
-      </form>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Correct Answer</label>
+                      <select
+                        value={q.correctAnswer}
+                        onChange={(e) => updateQuestion(qIndex, 'correctAnswer', e.target.value)}
+                        style={styles.input}
+                        onFocus={(e) => e.target.style.borderColor = colors.primary}
+                        onBlur={(e) => e.target.style.borderColor = colors.border}
+                      >
+                        {q.options?.map((opt, i) => (
+                          <option key={i} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || questions.length === 0}
+            style={styles.submitButton}
+            onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+            onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+          >
+            {loading ? 'Creating Quiz...' : 'Create Quiz'}
+          </button>
+        </form>
       </div>
     </div>
   );
