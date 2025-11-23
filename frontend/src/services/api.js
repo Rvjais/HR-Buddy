@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://hr-buddy-xnmt.onrender.com' || 'http://localhost:5000/api';
+const API_URL = 'https://hr-buddy-server.onrender.com' || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
