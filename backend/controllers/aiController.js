@@ -26,8 +26,8 @@ export const generateQuestions = async (req, res) => {
 async function generateQuestionsForProfile(jobProfile, count) {
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Use gemini-1.5-flash for speed and efficiency
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Use gemini-pro which is widely available and stable
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `You are an expert technical interviewer. Generate ${count} multiple choice interview questions for a ${jobProfile} position.
     
