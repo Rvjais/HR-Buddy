@@ -285,6 +285,20 @@ const TakeQuiz = () => {
       marginTop: '12px',
       marginBottom: '0',
     },
+    textArea: {
+      width: '100%',
+      minHeight: '120px',
+      padding: '16px',
+      borderRadius: '12px',
+      border: `2px solid ${colors.border}`,
+      backgroundColor: colors.backgroundSecondary,
+      color: colors.textPrimary,
+      fontSize: '16px',
+      resize: 'vertical',
+      fontFamily: 'inherit',
+      outline: 'none',
+      transition: 'border-color 0.3s ease',
+    },
   });
 
   const styles = getStyles();
@@ -348,40 +362,58 @@ const TakeQuiz = () => {
 
               <p style={styles.questionText}>{question.questionText}</p>
 
-              <div style={styles.optionsContainer}>
-                {question.options?.map((option, optIndex) => (
-                  <label
-                    key={optIndex}
-                    style={{
-                      ...styles.optionLabel,
-                      backgroundColor: answers[index] === option ? colors.backgroundTertiary : colors.backgroundSecondary,
-                      borderColor: answers[index] === option ? colors.primary : colors.border
-                    }}
-                    onMouseEnter={(e) => {
-                      if (answers[index] !== option) {
-                        e.currentTarget.style.borderColor = colors.primary;
-                        e.currentTarget.style.transform = 'translateX(4px)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (answers[index] !== option) {
-                        e.currentTarget.style.borderColor = colors.border;
-                        e.currentTarget.style.transform = 'translateX(0)';
-                      }
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name={`question-${index}`}
-                      value={option}
-                      checked={answers[index] === option}
-                      onChange={() => handleAnswerChange(index, option)}
-                      style={styles.radio}
-                    />
-                    <span style={styles.optionText}>{option}</span>
-                  </label>
-                ))}
-              </div>
+              {question.type === 'text' ? (
+                <textarea
+                  style={{
+                    ...styles.textArea,
+                    borderColor: answers[index] ? colors.primary : colors.border
+                  }}
+                  placeholder="Type your answer here..."
+                  value={answers[index] || ''}
+                  onChange={(e) => handleAnswerChange(index, e.target.value)}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    alert("Pasting is not allowed for this question!");
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = colors.primary}
+                  onBlur={(e) => !answers[index] && (e.target.style.borderColor = colors.border)}
+                />
+              ) : (
+                <div style={styles.optionsContainer}>
+                  {question.options?.map((option, optIndex) => (
+                    <label
+                      key={optIndex}
+                      style={{
+                        ...styles.optionLabel,
+                        backgroundColor: answers[index] === option ? colors.backgroundTertiary : colors.backgroundSecondary,
+                        borderColor: answers[index] === option ? colors.primary : colors.border
+                      }}
+                      onMouseEnter={(e) => {
+                        if (answers[index] !== option) {
+                          e.currentTarget.style.borderColor = colors.primary;
+                          e.currentTarget.style.transform = 'translateX(4px)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (answers[index] !== option) {
+                          e.currentTarget.style.borderColor = colors.border;
+                          e.currentTarget.style.transform = 'translateX(0)';
+                        }
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name={`question-${index}`}
+                        value={option}
+                        checked={answers[index] === option}
+                        onChange={() => handleAnswerChange(index, option)}
+                        style={styles.radio}
+                      />
+                      <span style={styles.optionText}>{option}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
