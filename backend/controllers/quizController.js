@@ -13,12 +13,18 @@ export const createQuiz = async (req, res) => {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
+    // Sanitize questions to ensure type matches schema
+    const sanitizedQuestions = questions.map(q => ({
+      ...q,
+      type: q.type === 'text' ? 'open' : q.type
+    }));
+
     const quiz = await Quiz.create({
       title,
       jobProfile,
       description,
       timeLimitMinutes,
-      questions,
+      questions: sanitizedQuestions,
       createdBy: req.user._id,
       isPublished: false
     });
@@ -125,7 +131,14 @@ export const updateQuiz = async (req, res) => {
     quiz.jobProfile = jobProfile || quiz.jobProfile;
     quiz.description = description !== undefined ? description : quiz.description;
     quiz.timeLimitMinutes = timeLimitMinutes || quiz.timeLimitMinutes;
-    quiz.questions = questions || quiz.questions;
+
+    if (questions) {
+      quiz.questions = questions.map(q => ({
+        ...q,
+        type: q.type === 'text' ? 'open' : q.type
+      }));
+    }
+
     quiz.isPublished = isPublished !== undefined ? isPublished : quiz.isPublished;
 
     const updatedQuiz = await quiz.save();

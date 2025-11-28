@@ -8,7 +8,7 @@ const CreateQuiz = () => {
   const [title, setTitle] = useState('');
   const [jobProfile, setJobProfile] = useState('');
   const [description, setDescription] = useState('');
-  const [timeLimitMinutes, setTimeLimitMinutes] = useState(30);
+  const [defaultTimeLimit, setDefaultTimeLimit] = useState(60);
   const [numberOfQuestions, setNumberOfQuestions] = useState(20);
   const [questions, setQuestions] = useState([]);
   const [generating, setGenerating] = useState(false);
@@ -51,12 +51,18 @@ const CreateQuiz = () => {
     setLoading(true);
 
     try {
+      // Calculate total time limit for backward compatibility
+      const totalTimeMinutes = Math.ceil(questions.reduce((acc, q) => acc + (q.timeLimitSeconds || defaultTimeLimit), 0) / 60);
+
       const response = await quizAPI.create({
         title,
         jobProfile,
         description,
-        timeLimitMinutes,
-        questions
+        timeLimitMinutes: totalTimeMinutes, // Kept for schema compatibility
+        questions: questions.map(q => ({
+          ...q,
+          timeLimitSeconds: q.timeLimitSeconds || defaultTimeLimit
+        }))
       });
       navigate('/dashboard');
     } catch (err) {
@@ -336,14 +342,14 @@ const CreateQuiz = () => {
 
             <div style={styles.row}>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Time Limit (minutes) *</label>
+                <label style={styles.label}>Default Time per Question (seconds)</label>
                 <input
                   type="number"
-                  value={timeLimitMinutes}
-                  onChange={(e) => setTimeLimitMinutes(parseInt(e.target.value) || 0)}
+                  value={defaultTimeLimit}
+                  onChange={(e) => setDefaultTimeLimit(parseInt(e.target.value) || 60)}
                   required
-                  min={5}
-                  max={60}
+                  min={10}
+                  max={600}
                   style={styles.input}
                   onFocus={(e) => e.target.style.borderColor = colors.primary}
                   onBlur={(e) => e.target.style.borderColor = colors.border}
@@ -415,35 +421,50 @@ const CreateQuiz = () => {
                     </div>
 
                     <div style={styles.formGroup}>
-                      <label style={styles.label}>Options</label>
-                      {q.options?.map((opt, optIndex) => (
-                        <input
-                          key={optIndex}
-                          type="text"
-                          value={opt}
-                          onChange={(e) => updateOption(qIndex, optIndex, e.target.value)}
-                          style={{ ...styles.input, marginBottom: '8px' }}
-                          placeholder={`Option ${optIndex + 1}`}
-                          onFocus={(e) => e.target.style.borderColor = colors.primary}
-                          onBlur={(e) => e.target.style.borderColor = colors.border}
-                        />
-                      ))}
+                      <label style={styles.label}>Time Limit (seconds)</label>
+                      <input
+                        type="number"
+                        value={q.timeLimitSeconds || defaultTimeLimit}
+                        onChange={(e) => updateQuestion(qIndex, 'timeLimitSeconds', parseInt(e.target.value))}
+                        style={styles.input}
+                        min={10}
+                      />
                     </div>
 
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>Correct Answer</label>
-                      <select
-                        value={q.correctAnswer}
-                        onChange={(e) => updateQuestion(qIndex, 'correctAnswer', e.target.value)}
-                        style={styles.input}
-                        onFocus={(e) => e.target.style.borderColor = colors.primary}
-                        onBlur={(e) => e.target.style.borderColor = colors.border}
-                      >
-                        {q.options?.map((opt, i) => (
-                          <option key={i} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                    </div>
+                    {q.type === 'mcq' && (
+                      <>
+                        <div style={styles.formGroup}>
+                          <label style={styles.label}>Options</label>
+                          {q.options?.map((opt, optIndex) => (
+                            <input
+                              key={optIndex}
+                              type="text"
+                              value={opt}
+                              onChange={(e) => updateOption(qIndex, optIndex, e.target.value)}
+                              style={{ ...styles.input, marginBottom: '8px' }}
+                              placeholder={`Option ${optIndex + 1}`}
+                              onFocus={(e) => e.target.style.borderColor = colors.primary}
+                              onBlur={(e) => e.target.style.borderColor = colors.border}
+                            />
+                          ))}
+                        </div>
+
+                        <div style={styles.formGroup}>
+                          <label style={styles.label}>Correct Answer</label>
+                          <select
+                            value={q.correctAnswer}
+                            onChange={(e) => updateQuestion(qIndex, 'correctAnswer', e.target.value)}
+                            style={styles.input}
+                            onFocus={(e) => e.target.style.borderColor = colors.primary}
+                            onBlur={(e) => e.target.style.borderColor = colors.border}
+                          >
+                            {q.options?.map((opt, i) => (
+                              <option key={i} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>

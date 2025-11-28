@@ -43,7 +43,7 @@ async function generateQuestionsForProfile(jobProfile, count) {
     const prompt = `You are an expert technical interviewer. Generate ${count} interview questions for a ${jobProfile} position.
     
     Include a mix of Multiple Choice Questions (MCQ) and Open-Ended Text Questions.
-    At least 20% of the questions should be text-based (type: "text").
+    At least 20% of the questions should be text-based (type: "open").
 
     Return ONLY a raw JSON array (no markdown formatting, no code blocks) with this exact schema for each question:
     
@@ -52,20 +52,23 @@ async function generateQuestionsForProfile(jobProfile, count) {
       "questionText": "The actual question string",
       "type": "mcq",
       "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correctAnswer": "The correct option string (must match one of the options exactly)"
+      "correctAnswer": "The correct option string (must match one of the options exactly)",
+      "timeLimitSeconds": 60
     }
 
-    For Text Questions:
+    For Open Questions:
     {
       "questionText": "The actual question string",
-      "type": "text"
+      "type": "open",
+      "timeLimitSeconds": 120
     }
 
     Requirements:
     1. Questions should be practical and relevant to ${jobProfile}.
     2. For MCQs, provide exactly 4 options and ensure correctAnswer matches one option exactly.
-    3. For Text Questions, do NOT provide options or correctAnswer.
-    4. Do not wrap the output in \`\`\`json or any other text. Return ONLY the JSON string.`;
+    3. For Open Questions, do NOT provide options or correctAnswer.
+    4. Set reasonable time limits (e.g., 60s for easy MCQs, 120s for complex/open questions).
+    5. Do not wrap the output in \`\`\`json or any other text. Return ONLY the JSON string.`;
 
     console.log('Sending request to OpenAI...');
 
@@ -96,3 +99,41 @@ async function generateQuestionsForProfile(jobProfile, count) {
     throw new Error("Failed to generate questions with AI: " + error.message);
   }
 }
+
+export const evaluateAnswer = async (question, answer) => {
+  try {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) return { isCorrect: false, feedback: "AI evaluation unavailable" };
+
+    const openai = new OpenAI({
+      apiKey,
+      baseURL: apiKey.startsWith('sk-or-v1') ? 'https://openrouter.ai/api/v1' : undefined,
+    });
+
+    const prompt = `You are an expert technical interviewer. Evaluate the following answer for a technical interview question.
+    
+    Question: "${question}"
+    Candidate's Answer: "${answer}"
+    
+    Determine if the answer is correct or acceptable.
+    Return ONLY a raw JSON object with this schema:
+    {
+      "isCorrect": boolean,
+      "score": number (0-10),
+      "feedback": "Brief feedback explaining the score"
+    }`;
+
+    const completion = await openai.chat.completions.create({
+      model: apiKey.startsWith('sk-or-v1') ? 'openai/gpt-4o' : 'gpt-4o',
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
+    });
+
+    let text = completion.choices[0].message.content;
+    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("AI Evaluation Error:", error);
+    return { isCorrect: false, score: 0, feedback: "Evaluation failed" };
+  }
+};

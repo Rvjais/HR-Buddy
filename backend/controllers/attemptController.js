@@ -1,5 +1,6 @@
 import Attempt from '../models/Attempt.js';
 import Quiz from '../models/Quiz.js';
+import { evaluateAnswer } from './aiController.js';
 
 // @desc    Start a new quiz attempt
 // @route   POST /api/attempts/start
@@ -70,9 +71,22 @@ export const submitAttempt = async (req, res) => {
 
     // Calculate score
     let correctCount = 0;
-    const processedAnswers = answers.map((answer, index) => {
+
+    const processedAnswers = await Promise.all(answers.map(async (answer) => {
       const question = quiz.questions[answer.questionIndex];
-      const isCorrect = question && answer.selectedOption === question.correctAnswer;
+
+      if (!question) return { ...answer, isCorrect: false };
+
+      let isCorrect = false;
+
+      if (question.type === 'mcq') {
+        isCorrect = answer.selectedOption === question.correctAnswer;
+      } else if (question.type === 'open') {
+        // AI Evaluation for open questions
+        const evaluation = await evaluateAnswer(question.questionText, answer.selectedOption);
+        isCorrect = evaluation.isCorrect;
+        // You might want to store the feedback/score too, but for now we just use isCorrect
+      }
 
       if (isCorrect) {
         correctCount++;
@@ -83,7 +97,7 @@ export const submitAttempt = async (req, res) => {
         selectedOption: answer.selectedOption,
         isCorrect
       };
-    });
+    }));
 
     const score = (correctCount / quiz.questions.length) * 100;
 

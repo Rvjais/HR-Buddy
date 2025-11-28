@@ -13,7 +13,7 @@ const questionSchema = new mongoose.Schema({
   options: {
     type: [String],
     validate: {
-      validator: function(arr) {
+      validator: function (arr) {
         return this.type === 'mcq' ? arr.length >= 2 : true;
       },
       message: 'MCQ questions must have at least 2 options'
@@ -21,7 +21,13 @@ const questionSchema = new mongoose.Schema({
   },
   correctAnswer: {
     type: String,
-    required: true
+    required: function () {
+      return this.type === 'mcq';
+    }
+  },
+  timeLimitSeconds: {
+    type: Number,
+    default: 60
   }
 });
 
@@ -58,7 +64,7 @@ const quizSchema = new mongoose.Schema({
   questions: {
     type: [questionSchema],
     validate: {
-      validator: function(arr) {
+      validator: function (arr) {
         return arr.length >= 1;
       },
       message: 'Quiz must have at least 1 question'

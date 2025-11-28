@@ -8,6 +8,7 @@ import ThemeToggle from '../components/ThemeToggle';
 const TakeQuiz = () => {
   const { id, attemptId } = useParams();
   const [quiz, setQuiz] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -27,20 +28,26 @@ const TakeQuiz = () => {
     };
   }, [id]);
 
+  // Reset timer when question changes
+  useEffect(() => {
+    if (quiz && quiz.questions && quiz.questions[currentQuestionIndex]) {
+      const questionTime = quiz.questions[currentQuestionIndex].timeLimitSeconds || 60;
+      setTimeLeft(questionTime);
+      startTimer();
+    }
+  }, [currentQuestionIndex, quiz]);
+
   const fetchQuiz = async () => {
     try {
       const response = await quizAPI.getPublic(id);
       const quizData = response.data;
 
-      // Validate quiz data
-      if (!quizData || !quizData.timeLimitMinutes || !quizData.questions) {
+      if (!quizData || !quizData.questions) {
         throw new Error('Invalid quiz data');
       }
 
       setQuiz(quizData);
-      const timeInSeconds = quizData.timeLimitMinutes * 60;
-      setTimeLeft(timeInSeconds);
-      startTimer(timeInSeconds);
+      // Timer will be started by the useEffect above
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to load quiz');
     } finally {
@@ -48,12 +55,14 @@ const TakeQuiz = () => {
     }
   };
 
-  const startTimer = (initialTime) => {
+  const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
-          handleSubmit(true); // Auto-submit when time runs out
+          handleNextQuestion(true); // Auto-advance on timeout
           return 0;
         }
         return prev - 1;
@@ -61,11 +70,23 @@ const TakeQuiz = () => {
     }, 1000);
   };
 
-  const handleAnswerChange = (questionIndex, answer) => {
+  const handleAnswerChange = (answer) => {
     setAnswers({
       ...answers,
-      [questionIndex]: answer
+      [currentQuestionIndex]: answer
     });
+  };
+
+  const handleNextQuestion = async (isTimeout = false) => {
+    if (submitting) return;
+
+    // Save current answer locally (already done via handleAnswerChange)
+
+    if (currentQuestionIndex < quiz.questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      handleSubmit(isTimeout);
+    }
   };
 
   const handleSubmit = async (isTimeout = false) => {
@@ -82,13 +103,12 @@ const TakeQuiz = () => {
     }));
 
     try {
-      const response = await attemptAPI.submit(attemptId, {
+      await attemptAPI.submit(attemptId, {
         answers: formattedAnswers,
         timeTakenSeconds: timeTaken,
         isTimeout
       });
 
-      // Navigate to results page
       navigate(`/quiz/${id}/results/${attemptId}`);
     } catch (err) {
       setError('Failed to submit quiz');
@@ -117,27 +137,9 @@ const TakeQuiz = () => {
       alignItems: 'center',
       border: `1px solid ${colors.border}`,
       boxShadow: `${shadows.md} ${colors.shadowColor}`,
-      flexWrap: 'wrap',
-      gap: '16px',
-    },
-    headerLeft: {
-      flex: 1,
-    },
-    title: {
-      fontSize: '24px',
-      fontWeight: 'bold',
-      color: colors.textPrimary,
-      margin: '0',
-    },
-    subtitle: {
-      fontSize: '14px',
-      color: colors.textSecondary,
-      margin: '5px 0 0 0',
-    },
-    headerRight: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
+      position: 'sticky',
+      top: '20px',
+      zIndex: 100,
     },
     timerBox: {
       textAlign: 'center',
@@ -145,6 +147,7 @@ const TakeQuiz = () => {
       background: colors.backgroundSecondary,
       borderRadius: '12px',
       border: `1px solid ${colors.border}`,
+      minWidth: '120px',
     },
     timer: {
       fontSize: '32px',
@@ -156,54 +159,24 @@ const TakeQuiz = () => {
       color: colors.textSecondary,
       marginTop: '5px',
     },
-    progressBar: {
-      height: '8px',
-      background: colors.backgroundSecondary,
-      borderRadius: '4px',
-      marginBottom: '20px',
-      overflow: 'hidden',
-      border: `1px solid ${colors.border}`,
-    },
-    progressFill: {
-      height: '100%',
-      background: gradients.success,
-      transition: 'width 0.3s ease',
-    },
-    error: {
-      backgroundColor: colors.errorLight,
-      color: colors.error,
-      padding: '15px 20px',
-      borderRadius: '12px',
-      marginBottom: '20px',
-      border: `1px solid ${colors.error}`,
-      animation: 'slideIn 0.3s ease',
-    },
-    loading: {
-      background: gradients.card,
-      padding: '40px',
-      borderRadius: '16px',
-      textAlign: 'center',
-      fontSize: '18px',
-      color: colors.textSecondary,
-      border: `1px solid ${colors.border}`,
-      boxShadow: `${shadows.md} ${colors.shadowColor}`,
-      animation: 'pulse 2s ease-in-out infinite',
-    },
     questionsContainer: {
       display: 'flex',
       flexDirection: 'column',
       gap: '20px',
       marginBottom: '30px',
     },
-    questionCard: {
+    questionCard: (index) => ({
       background: gradients.card,
       padding: '28px',
       borderRadius: '16px',
       border: `1px solid ${colors.border}`,
       boxShadow: `${shadows.md} ${colors.shadowColor}`,
-      transition: 'all 0.3s ease',
-      animation: 'fadeIn 0.6s ease',
-    },
+      transition: 'all 0.5s ease',
+      opacity: index === currentQuestionIndex ? 1 : 0.5,
+      filter: index > currentQuestionIndex ? 'blur(5px)' : 'none',
+      pointerEvents: index === currentQuestionIndex ? 'auto' : 'none',
+      transform: index === currentQuestionIndex ? 'scale(1)' : 'scale(0.98)',
+    }),
     questionHeader: {
       display: 'flex',
       justifyContent: 'space-between',
@@ -215,21 +188,12 @@ const TakeQuiz = () => {
       fontWeight: 'bold',
       color: colors.primary,
     },
-    answeredBadge: {
-      background: gradients.success,
-      color: 'white',
-      padding: '6px 14px',
-      borderRadius: '20px',
-      fontSize: '12px',
-      fontWeight: '600',
-      boxShadow: `${shadows.sm} ${colors.shadowColor}`,
-    },
     questionText: {
-      fontSize: '16px',
+      fontSize: '18px',
       color: colors.textPrimary,
       marginBottom: '20px',
       lineHeight: '1.5',
-      fontWeight: '500',
+      fontWeight: '600',
     },
     optionsContainer: {
       display: 'flex',
@@ -257,34 +221,6 @@ const TakeQuiz = () => {
       color: colors.textPrimary,
       flex: '1',
     },
-    submitSection: {
-      background: gradients.card,
-      padding: '24px',
-      borderRadius: '16px',
-      textAlign: 'center',
-      border: `1px solid ${colors.border}`,
-      boxShadow: `${shadows.lg} ${colors.shadowColor}`,
-      position: 'sticky',
-      bottom: '20px',
-    },
-    submitButton: {
-      background: gradients.success,
-      color: 'white',
-      padding: '14px 40px',
-      border: 'none',
-      borderRadius: '12px',
-      fontSize: '16px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      boxShadow: `${shadows.md} ${colors.shadowColor}`,
-    },
-    warning: {
-      fontSize: '14px',
-      color: colors.textSecondary,
-      marginTop: '12px',
-      marginBottom: '0',
-    },
     textArea: {
       width: '100%',
       minHeight: '120px',
@@ -299,70 +235,79 @@ const TakeQuiz = () => {
       outline: 'none',
       transition: 'border-color 0.3s ease',
     },
+    nextButton: {
+      background: gradients.primary,
+      color: 'white',
+      padding: '12px 30px',
+      border: 'none',
+      borderRadius: '12px',
+      fontSize: '16px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      marginTop: '20px',
+      float: 'right',
+    },
+    lockedOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0,0,0,0.05)',
+      borderRadius: '16px',
+      zIndex: 10,
+    }
   });
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+  };
 
   const styles = getStyles();
 
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.wrapper}>
-          <div style={styles.loading}>Loading quiz...</div>
-        </div>
+        <div style={styles.wrapper}>Loading quiz...</div>
       </div>
     );
   }
-
-  const answeredCount = Object.keys(answers).length;
-  const totalQuestions = quiz?.questions?.length || 0;
-  const progressPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
   return (
     <div style={styles.container}>
       <div style={styles.wrapper}>
         <div style={styles.header}>
-          <div style={styles.headerLeft}>
-            <h1 style={styles.title}>{quiz?.title}</h1>
-            <p style={styles.subtitle}>
-              Progress: {answeredCount} / {totalQuestions} answered
+          <div>
+            <h1 style={{ margin: 0, fontSize: '20px', color: colors.textPrimary }}>{quiz?.title}</h1>
+            <p style={{ margin: '5px 0 0 0', fontSize: '14px', color: colors.textSecondary }}>
+              Question {currentQuestionIndex + 1} of {quiz?.questions?.length}
             </p>
           </div>
-          <div style={styles.headerRight}>
-            <div style={styles.timerBox}>
-              <div style={{
-                ...styles.timer,
-                color: timeLeft < 60 ? colors.error : colors.textPrimary
-              }}>
-                {formatTime(timeLeft)}
-              </div>
-              <div style={styles.timerLabel}>Time Remaining</div>
+          <div style={styles.timerBox}>
+            <div style={{
+              ...styles.timer,
+              color: timeLeft < 10 ? colors.error : colors.textPrimary
+            }}>
+              {formatTime(timeLeft)}
             </div>
-            <ThemeToggle />
+            <div style={styles.timerLabel}>Time Limit</div>
           </div>
+          <ThemeToggle />
         </div>
-
-        <div style={styles.progressBar}>
-          <div style={{
-            ...styles.progressFill,
-            width: `${progressPercent}%`
-          }} />
-        </div>
-
-        {error && <div style={styles.error}>{error}</div>}
 
         <div style={styles.questionsContainer}>
           {quiz?.questions?.map((question, index) => (
-            <div key={index} style={styles.questionCard}>
+            <div key={index} style={styles.questionCard(index)}>
               <div style={styles.questionHeader}>
                 <span style={styles.questionNumber}>Question {index + 1}</span>
-                {answers[index] && (
-                  <span style={styles.answeredBadge}>Answered</span>
+                {index < currentQuestionIndex && (
+                  <span style={{ color: colors.success, fontWeight: 'bold' }}>Answered</span>
                 )}
               </div>
 
               <p style={styles.questionText}>{question.questionText}</p>
 
-              {question.type === 'text' ? (
+              {question.type === 'open' ? (
                 <textarea
                   style={{
                     ...styles.textArea,
@@ -370,13 +315,9 @@ const TakeQuiz = () => {
                   }}
                   placeholder="Type your answer here..."
                   value={answers[index] || ''}
-                  onChange={(e) => handleAnswerChange(index, e.target.value)}
-                  onPaste={(e) => {
-                    e.preventDefault();
-                    alert("Pasting is not allowed for this question!");
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = colors.primary}
-                  onBlur={(e) => !answers[index] && (e.target.style.borderColor = colors.border)}
+                  onChange={(e) => handleAnswerChange(e.target.value)}
+                  disabled={index !== currentQuestionIndex}
+                  onPaste={handlePaste}
                 />
               ) : (
                 <div style={styles.optionsContainer}>
@@ -386,19 +327,8 @@ const TakeQuiz = () => {
                       style={{
                         ...styles.optionLabel,
                         backgroundColor: answers[index] === option ? colors.backgroundTertiary : colors.backgroundSecondary,
-                        borderColor: answers[index] === option ? colors.primary : colors.border
-                      }}
-                      onMouseEnter={(e) => {
-                        if (answers[index] !== option) {
-                          e.currentTarget.style.borderColor = colors.primary;
-                          e.currentTarget.style.transform = 'translateX(4px)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (answers[index] !== option) {
-                          e.currentTarget.style.borderColor = colors.border;
-                          e.currentTarget.style.transform = 'translateX(0)';
-                        }
+                        borderColor: answers[index] === option ? colors.primary : colors.border,
+                        opacity: index !== currentQuestionIndex ? 0.7 : 1,
                       }}
                     >
                       <input
@@ -406,7 +336,8 @@ const TakeQuiz = () => {
                         name={`question-${index}`}
                         value={option}
                         checked={answers[index] === option}
-                        onChange={() => handleAnswerChange(index, option)}
+                        onChange={() => handleAnswerChange(option)}
+                        disabled={index !== currentQuestionIndex}
                         style={styles.radio}
                       />
                       <span style={styles.optionText}>{option}</span>
@@ -414,25 +345,19 @@ const TakeQuiz = () => {
                   ))}
                 </div>
               )}
+
+              {index === currentQuestionIndex && (
+                <button
+                  onClick={() => handleNextQuestion(false)}
+                  style={styles.nextButton}
+                >
+                  {index === quiz.questions.length - 1 ? 'Submit Quiz' : 'Next Question'}
+                </button>
+              )}
+
+              {index > currentQuestionIndex && <div style={styles.lockedOverlay} />}
             </div>
           ))}
-        </div>
-
-        <div style={styles.submitSection}>
-          <button
-            onClick={() => handleSubmit(false)}
-            disabled={submitting || answeredCount === 0}
-            style={styles.submitButton}
-            onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-            onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
-          >
-            {submitting ? 'Submitting...' : 'Submit Quiz'}
-          </button>
-          {answeredCount < totalQuestions && (
-            <p style={styles.warning}>
-              You have {totalQuestions - answeredCount} unanswered question(s)
-            </p>
-          )}
         </div>
       </div>
     </div>
