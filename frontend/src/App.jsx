@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateQuiz from './pages/CreateQuiz';
 import QuizAttempts from './pages/QuizAttempts';
+import AttemptDetails from './pages/AttemptDetails';
 
 // Candidate Pages
 import QuizWelcome from './pages/QuizWelcome';
@@ -62,6 +63,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <QuizAttempts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/attempt/:attemptId/details"
+              element={
+                <ProtectedRoute>
+                  <AttemptDetails />
                 </ProtectedRoute>
               }
             />

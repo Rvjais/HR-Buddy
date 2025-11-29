@@ -46,12 +46,11 @@ const ThemeToggle = () => {
     </button>
   );
 };
-
 const styles = {
   button: {
-    width: '44px',
-    height: '44px',
-    borderRadius: '50%',
+    width: '40px',
+    height: '40px',
+    borderRadius: '20%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -62,8 +61,8 @@ const styles = {
     overflow: 'hidden',
   },
   icon: {
-    width: '24px',
-    height: '24px',
+    width: '20px',
+    height: '20px',
   },
 };
 
