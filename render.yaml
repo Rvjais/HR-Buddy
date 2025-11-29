@@ -8,6 +8,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: FRONTEND_URL
+        value: https://hr-buddy-client.onrender.com
       - key: PORT
         value: 10000
 
@@ -19,7 +21,7 @@ services:
     staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_URL
-        value: https://hr-buddy-xnmt.onrender.com
+        value: https://hr-buddy-server.onrender.com
     routes:
       - type: rewrite
         source: /*
