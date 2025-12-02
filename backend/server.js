@@ -29,11 +29,13 @@ const corsOptions = {
       'http://localhost:3000',
       'https://hr-buddy-client.onrender.com',
       process.env.FRONTEND_URL
-    ].filter(Boolean); // Remove any undefined values
+    ].filter(Boolean);
 
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // Check if origin is allowed or if it's a Vercel deployment
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
+      console.log('Blocked by CORS:', origin); // Log the blocked origin for debugging
       callback(new Error('Not allowed by CORS'));
     }
   },
