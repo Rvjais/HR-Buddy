@@ -47,6 +47,11 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to HR Buddy API' });
+});
+
 // Health check route
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'HR Buddy API is running' });
